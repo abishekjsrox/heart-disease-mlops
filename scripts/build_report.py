@@ -172,7 +172,7 @@ python scripts/download_data.py          # UCI download -> data/raw, data/proces
 python scripts/run_eda.py                # figures -> reports/figures
 python -m heartrisk.train                # tuning + MLflow + models/model.joblib
 pytest -v                                # unit tests
-mlflow ui --backend-store-uri sqlite:///mlflow.db --port 5000
+mlflow ui --backend-store-uri sqlite:///mlflow.db --port 5001
 docker build -t heart-risk-api:1.0.0 . && docker run -p 8000:8000 heart-risk-api:1.0.0
 kubectl apply -f k8s/                     # Docker Desktop Kubernetes / minikube
 docker compose up -d                     # API + Prometheus :9090 + Grafana :3000""")

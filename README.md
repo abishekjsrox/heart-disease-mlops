@@ -55,7 +55,7 @@ pip install -r requirements.txt      # installs pinned libs + this package (-e .
 python scripts/download_data.py      # UCI -> data/raw, cleaned -> data/processed
 python scripts/run_eda.py            # figures -> reports/figures
 python -m heartrisk.train            # grid search x3 models, MLflow, saves models/
-mlflow ui --backend-store-uri sqlite:///mlflow.db --port 5000   # http://localhost:5000
+mlflow ui --backend-store-uri sqlite:///mlflow.db --port 5001   # http://localhost:5001
 ```
 
 The same steps, with commentary, are in `notebooks/01_eda.ipynb`, `02_training.ipynb` and

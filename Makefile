@@ -24,8 +24,8 @@ test:
 serve:        ## run API without Docker
 	uvicorn heartrisk.api:app --host 0.0.0.0 --port 8000 --reload
 
-mlflow:       ## MLflow UI on http://localhost:5000
-	mlflow ui --backend-store-uri sqlite:///mlflow.db --port 5000
+mlflow:       ## MLflow UI on http://localhost:5001
+	mlflow ui --backend-store-uri sqlite:///mlflow.db --port 5001
 
 docker-build:
 	docker build -t $(IMAGE) .
