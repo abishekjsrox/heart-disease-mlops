@@ -1,0 +1,10 @@
+{
+  "student_name": "Abishek J S",
+  "student_id": "2025AE05545",
+  "repo_url": "https://github.com/<your-github-username>/heart-disease-mlops",
+  "video_url": "<paste video link (Google Drive / YouTube unlisted)>",
+  "submission_date": "October 2026",
+  "k8s_platform": "Docker Desktop Kubernetes",
+  "test_count": 24,
+  "api_access": "Local deployment - run `kubectl apply -f k8s/` then call http://localhost/predict (steps in README)"
+}

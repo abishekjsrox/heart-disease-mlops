@@ -1,9 +1,9 @@
 {
   "model_name": "logistic_regression",
-  "model_version": "1.0.0+unknown",
+  "model_version": "1.0.0+31a61fa",
   "registry_name": "heart-disease-classifier",
   "registry_version": 1,
-  "mlflow_run_id": "218c7a7bf9a04eec8eb7531a01c12096",
+  "mlflow_run_id": "6aacdd7c9fc745c1827f41ee11c4ec8f",
   "decision_threshold": 0.3,
   "target_recall": 0.9,
   "best_params": {
@@ -40,7 +40,7 @@
     "ca",
     "thal"
   ],
-  "trained_at": "2026-10-09T07:12:26+00:00",
+  "trained_at": "2026-10-09T07:18:13+00:00",
   "sklearn_version": "1.7.2",
   "python_version": "3.11.17"
 }
