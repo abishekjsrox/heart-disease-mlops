@@ -1,0 +1,18 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 15s
+
+rule_files: []
+
+scrape_configs:
+  - job_name: heart-api-docker          # container started by docker compose
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["api:8000"]
+        labels: {env: docker}
+
+  - job_name: heart-api-k8s             # Kubernetes LoadBalancer on localhost:80 (Docker Desktop)
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["host.docker.internal:80"]
+        labels: {env: kubernetes}

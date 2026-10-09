@@ -1,0 +1,27 @@
+{
+  "rows": 303,
+  "columns": 14,
+  "missing_values": {
+    "ca": 4,
+    "thal": 2
+  },
+  "class_counts": {
+    "No disease": 164,
+    "Disease": 139
+  },
+  "top_correlations_with_target": {
+    "thal": 0.526,
+    "ca": 0.46,
+    "exang": 0.432,
+    "oldpeak": 0.425,
+    "thalach": 0.417,
+    "cp": 0.414
+  },
+  "figures": [
+    "01_class_balance.png",
+    "02_histograms.png",
+    "03_correlation_heatmap.png",
+    "04_categorical_disease_rate.png",
+    "05_boxplots_by_outcome.png"
+  ]
+}

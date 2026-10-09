@@ -1,0 +1,132 @@
+name: ci-cd
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: "3.11"
+  IMAGE_NAME: heart-risk-api
+
+jobs:
+  lint:
+    name: 1. Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install flake8==7.4.1
+      - name: flake8
+        run: flake8 src tests scripts --count --show-source --statistics
+
+  test:
+    name: 2. Unit tests
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Download and clean data
+        run: python scripts/download_data.py --force
+      - name: Quick training (so model/API tests run against a fresh model)
+        run: python -m heartrisk.train --quick
+      - name: Run pytest
+        run: pytest -v --junitxml=junit.xml --cov=heartrisk --cov-report=xml --cov-report=term
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-reports
+          path: |
+            junit.xml
+            coverage.xml
+
+  train:
+    name: 3. Train & track model
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: python scripts/download_data.py --force
+      - run: python scripts/run_eda.py
+      - name: Train with full hyper-parameter search
+        run: python -m heartrisk.train 2>&1 | tee training.log
+      - name: Quality gate (fails the pipeline if the model is not good enough)
+        run: pytest tests/test_model.py -v
+      - name: Write metrics to job summary
+        run: |
+          echo "## Model comparison" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat reports/model_comparison.csv >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          cat models/model_meta.json >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: model
+          path: |
+            models/model.joblib
+            models/model_meta.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: training-outputs
+          path: |
+            training.log
+            reports/
+            mlruns/
+            mlflow.db
+
+  docker:
+    name: 4. Build & smoke-test container
+    needs: train
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: model
+          path: models
+      - name: Build image
+        run: docker build -t $IMAGE_NAME:${{ github.sha }} -t $IMAGE_NAME:latest .
+      - name: Run container
+        run: docker run -d --name api -p 8000:8000 $IMAGE_NAME:latest
+      - name: Wait for readiness
+        run: |
+          for i in $(seq 1 30); do
+            curl -sf localhost:8000/ready && exit 0
+            sleep 2
+          done
+          docker logs api; exit 1
+      - name: Smoke test /predict
+        run: |
+          set -e
+          curl -sf -X POST localhost:8000/predict -H 'Content-Type: application/json' \
+               -d @samples/high_risk.json | tee predict.json
+          python3 -c "import json; r=json.load(open('predict.json')); assert r['prediction'] in (0,1) and 0<=r['confidence']<=1; print('OK', r)"
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST localhost:8000/predict \
+                 -H 'Content-Type: application/json' -d '{"age": 500}')
+          test "$code" = "422"
+          curl -sf localhost:8000/metrics | grep api_requests_total
+      - name: Save container logs
+        if: always()
+        run: docker logs api > container.log 2>&1 || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: container-logs
+          path: container.log

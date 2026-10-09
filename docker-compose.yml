@@ -1,0 +1,32 @@
+# Local stack: API + Prometheus + Grafana.   docker compose up -d --build
+services:
+  api:
+    build: .
+    image: heart-risk-api:1.0.0
+    container_name: heart-api
+    ports: ["8000:8000"]
+    environment:
+      LOG_FILE: /tmp/api.log
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports: ["9090:9090"]
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    depends_on: [api]
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    container_name: grafana
+    ports: ["3000:3000"]
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on: [prometheus]

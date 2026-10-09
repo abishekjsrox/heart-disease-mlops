@@ -1,0 +1,4 @@
+,cv_accuracy,cv_precision,cv_recall,cv_f1,cv_roc_auc,cv_roc_auc_std,cv_recall_std,test_accuracy,test_precision,test_recall,test_f1,test_roc_auc,threshold
+logistic_regression,0.8552,0.8819,0.8008,0.8342,0.9071,0.0202,0.075,0.8033,0.7105,0.9643,0.8182,0.961,0.3
+random_forest,0.8181,0.8387,0.7644,0.7916,0.8996,0.0234,0.0983,0.7869,0.6923,0.9643,0.806,0.9535,0.31
+gradient_boosting,0.818,0.8358,0.7648,0.7928,0.8835,0.0245,0.0797,0.7377,0.6429,0.9643,0.7714,0.9578,0.22
