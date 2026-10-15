@@ -10,3 +10,4 @@ mlflow.db
 *.log
 .ipynb_checkpoints/
 .DS_Store
+~$*
